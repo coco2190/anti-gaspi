@@ -3,154 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anti-Gaspi - Collège du Vaucluse</title>
-    
+    <title>Calculateur ODD 12 - Collège</title>
     <style>
-        :root {
-            --odd-orange: #e19526; 
-            --bg-color: #f4f7f6;
-        }
-
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background-color: var(--bg-color);
-            margin: 0;
-            padding-bottom: 50px;
-        }
-
-        header {
-            background-color: var(--odd-orange);
-            color: white;
-            padding: 20px;
-            text-align: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        .container {
-            max-width: 500px;
-            margin: 20px auto;
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-
-        h2 { color: var(--odd-orange); border-bottom: 2px solid #eee; padding-bottom: 10px; }
-
-        .input-group {
-            margin-bottom: 15px;
-            text-align: left;
-        }
-
-        label { display: block; font-weight: bold; margin-bottom: 5px; color: #555; }
+        body { font-family: sans-serif; background-color: #f4f4f4; text-align: center; padding: 20px; }
+        .box { background: white; max-width: 450px; margin: auto; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h1 { color: #e19526; font-size: 22px; }
         
-        input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-            box-sizing: border-box;
-        }
-
-        input:focus { border-color: var(--odd-orange); outline: none; }
-
-        .resultat-box {
-            margin-top: 25px;
-            padding: 20px;
-            border-radius: 10px;
-            background-color: #333;
-            color: white;
-            text-align: center;
-        }
-
-        .total-kg { font-size: 30px; color: var(--odd-orange); display: block; }
-
-        .conseil {
-            margin-top: 20px;
-            font-size: 14px;
-            color: #777;
-            background: #fff8e1;
-            padding: 10px;
-            border-radius: 5px;
-        }
+        /* Style pour les catégories */
+        .ligne { margin: 15px 0; text-align: left; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; }
+        input { width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        
+        .resultat { background: #333; color: white; padding: 20px; border-radius: 10px; margin-top: 20px; }
+        #total { font-size: 30px; color: #e19526; display: block; }
     </style>
 </head>
 <body>
 
-<header>
-    <h1>Calculateur Anti-Gaspi</h1>
-    <p>Objectif Développement Durable 12</p>
-</header>
+<div class="box">
+    <h1>Stop au Gâchis (ODD 12)</h1>
+    <p>Entrez les pesées du jour en kg :</p>
 
-<div class="container">
-    <h2>Saisie des pesées (en kg)</h2>
-
-    <!-- Catégorie 1 -->
-    <div class="input-group">
-        <label>🥗 Déchets alimentaires (Restes de plats)</label>
-        <input type="number" id="alim" placeholder="0" oninput="calculerGlobal()">
+    <div class="ligne">
+        <label>🥗 Déchets alimentaires (plats)</label>
+        <input type="number" id="cat1" placeholder="0" oninput="calculer()">
     </div>
 
-    <!-- Catégorie 2 -->
-    <div class="input-group">
-        <label>🥖 Pain (Morceaux jetés)</label>
-        <input type="number" id="pain" placeholder="0" oninput="calculerGlobal()">
+    <div class="ligne">
+        <label>🥖 Pain</label>
+        <input type="number" id="cat2" placeholder="0" oninput="calculer()">
     </div>
 
-    <!-- Catégorie 3 -->
-    <div class="input-group">
-        <label>🧻 Serviettes en papier (Nombre ou poids)</label>
-        <input type="number" id="serviettes" placeholder="0" oninput="calculerGlobal()">
+    <div class="ligne">
+        <label>🧻 Serviettes papier</label>
+        <input type="number" id="cat3" placeholder="0" oninput="calculer()">
     </div>
 
-    <!-- Catégorie 4 -->
-    <div class="input-group">
-        <label>🍎 Fruits entamés ou entiers</label>
-        <input type="number" id="fruits" placeholder="0" oninput="calculerGlobal()">
+    <div class="ligne">
+        <label>🍎 Fruits entamés</label>
+        <input type="number" id="cat4" placeholder="0" oninput="calculer()">
     </div>
 
-    <div class="resultat-box">
-        <span id="label-total">Total du gaspillage :</span>
-        <span id="total" class="total-kg">0 kg</span>
-        <p id="phrase-impact"></p>
-    </div>
-
-    <div class="conseil">
-        <strong>Pourquoi ces 4 catégories ?</strong><br>
-        Pour savoir si on doit mieux doser les plats, moins prendre de pain, ou inciter à finir les fruits !
+    <div class="resultat">
+        <span>Total gaspillé aujourd'hui :</span>
+        <strong id="total">0 kg</strong>
+        <p id="phrase"></p>
     </div>
 </div>
 
 <script>
-    function calculerGlobal() {
-        // On récupère toutes les valeurs
-        const alim = parseFloat(document.getElementById('alim').value) || 0;
-        const pain = parseFloat(document.getElementById('pain').value) || 0;
-        const serviettes = parseFloat(document.getElementById('serviettes').value) || 0;
-        const fruits = parseFloat(document.getElementById('fruits').value) || 0;
+    function calculer() {
+        // On récupère les 4 valeurs
+        let v1 = parseFloat(document.getElementById('cat1').value) || 0;
+        let v2 = parseFloat(document.getElementById('cat2').value) || 0;
+        let v3 = parseFloat(document.getElementById('cat3').value) || 0;
+        let v4 = parseFloat(document.getElementById('cat4').value) || 0;
 
-        // Calcul du total
-        const total = alim + pain + serviettes + fruits;
-        
-        // Affichage du chiffre
-        document.getElementById('total').innerText = total.toFixed(2) + " kg";
+        // On fait l'addition
+        let somme = v1 + v2 + v3 + v4;
 
-        // Message d'impact
-        const phrase = document.getElementById('phrase-impact');
-        const repas = Math.round(total / 0.5);
+        // On affiche le résultat
+        document.getElementById('total').innerText = somme.toFixed(2) + " kg";
 
-        if (total > 0) {
-            phrase.innerHTML = "C'est l'équivalent de <strong>" + repas + " repas</strong> perdus pour 700 élèves.";
-            
-            // Changement de couleur si c'est trop haut (ex: plus de 60kg)
-            if (total > 60) {
-                document.getElementById('total').style.color = "#ff5252"; // Rouge
-            } else {
-                document.getElementById('total').style.color = "#4CAF50"; // Vert
-            }
+        // Petite phrase d'impact (un repas = 0.5kg)
+        let repas = Math.round(somme / 0.5);
+        if(somme > 0) {
+            document.getElementById('phrase').innerText = "Cela représente " + repas + " repas jetés.";
         } else {
-            phrase.innerText = "";
+            document.getElementById('phrase').innerText = "";
         }
     }
 </script>

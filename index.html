@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anti-Gaspi - Notre Collège</title>
+    
+    <style>
+        /* --- LE CSS (La décoration) --- */
+        :root {
+            --odd-orange: #e19526; /* Couleur officielle ODD 12 */
+            --bg-color: #fdf6e9;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            color: #333;
+        }
+
+        header {
+            background-color: var(--odd-orange);
+            color: white;
+            padding: 30px 10px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 30px auto;
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+        }
+
+        .card {
+            background: #fff3e0;
+            border-left: 5px solid var(--odd-orange);
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        input {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 18px;
+            box-sizing: border-box; /* Pour que ça ne dépasse pas */
+        }
+
+        .resultat-box {
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: #eee;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .info-odd {
+            font-size: 14px;
+            margin-top: 20px;
+            color: #666;
+            font-style: italic;
+        }
+
+        /* Couleur si c'est bien ou pas */
+        .bravo { color: #2e7d32; background-color: #e8f5e9; }
+        .alerte { color: #c62828; background-color: #ffebee; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Stop au Gâchis Alimentaire !</h1>
+    <p>Projet ODD 12 - Collège du Vaucluse</p>
+</header>
+
+<div class="container">
+    <div class="card">
+        <strong>💡 Info :</strong> Nous sommes 700 à la cantine. L'objectif est de jeter moins de 50 kg par jour.
+    </div>
+
+    <h3>Combien de kilos jetés aujourd'hui ?</h3>
+    <input type="number" id="poids" placeholder="Tape le poids en kg ici..." oninput="analyserLeGaspillage()">
+
+    <div id="resultat" class="resultat-box">
+        En attente de saisie...
+    </div>
+
+    <div class="info-odd">
+        En réduisant nos déchets, nous agissons pour l'Objectif de Développement Durable n°12 : Consommation et Production Responsables.
+    </div>
+</div>
+
+<script>
+    /* --- LE JAVASCRIPT (L'intelligence) --- */
+    function analyserLeGaspillage() {
+        // On récupère le chiffre tapé
+        const poids = document.getElementById('poids').value;
+        const blocResultat = document.getElementById('resultat');
+
+        if (poids === "" || poids <= 0) {
+            blocResultat.innerHTML = "En attente de saisie...";
+            blocResultat.className = "resultat-box";
+            return;
+        }
+
+        // Calculs
+        const repasPerdus = Math.round(poids / 0.5); // Un repas moyen = 500g
+        const grammesParEleve = Math.round((poids * 1000) / 700);
+
+        // Affichage du résultat
+        let message = "Cela représente <strong>" + repasPerdus + " repas</strong> jetés à la poubelle.<br>";
+        message += "<small>Soit " + grammesParEleve + "g par élève.</small>";
+
+        blocResultat.innerHTML = message;
+
+        // Changement de couleur selon le résultat
+        if (poids > 50) {
+            blocResultat.className = "resultat-box alerte";
+            blocResultat.innerHTML += "<br>🚨 C'est trop ! On peut faire mieux.";
+        } else {
+            blocResultat.className = "resultat-box bravo";
+            blocResultat.innerHTML += "<br>✅ Bravo ! On est sous l'objectif.";
+        }
+    }
+</script>
+
+</body>
+</html>

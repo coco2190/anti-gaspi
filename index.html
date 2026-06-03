@@ -5,74 +5,186 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calculateur ODD 12 - Collège</title>
     <style>
-        body { font-family: sans-serif; background-color: #f4f4f4; text-align: center; padding: 20px; }
-        .box { background: white; max-width: 450px; margin: auto; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        h1 { color: #e19526; font-size: 22px; }
+        :root {
+            --primary-color: #e19526;
+            --bg-color: #f4f6f9;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --border-color: #e0e0e0;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: var(--bg-color); 
+            color: var(--text-main);
+            text-align: center; 
+            padding: 20px; 
+            margin: 0;
+        }
+
+        .box { 
+            background: var(--card-bg); 
+            max-width: 480px; 
+            margin: 30px auto; 
+            padding: 30px; 
+            border-radius: 20px; 
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08); 
+        }
+
+        h1 { 
+            color: var(--primary-color); 
+            font-size: 24px; 
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+
+        .description {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
         
-        /* Style pour les catégories */
-        .ligne { margin: 15px 0; text-align: left; }
-        label { display: block; font-weight: bold; margin-bottom: 5px; }
-        input { width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        .ligne { 
+            margin-bottom: 20px; 
+            text-align: left; 
+        }
+
+        label { 
+            display: block; 
+            font-weight: 600; 
+            margin-bottom: 8px; 
+            font-size: 15px;
+        }
+
+        input { 
+            width: 100%; 
+            padding: 12px 15px; 
+            border: 2px solid var(--border-color); 
+            border-radius: 10px; 
+            box-sizing: border-box; 
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(225, 149, 38, 0.15);
+        }
         
-        .resultat { background: #333; color: white; padding: 20px; border-radius: 10px; margin-top: 20px; }
-        #total { font-size: 30px; color: #e19526; display: block; }
+        .resultat { 
+            background: #2c3e50; 
+            color: white; 
+            padding: 25px; 
+            border-radius: 15px; 
+            margin-top: 25px; 
+            transition: all 0.3s ease;
+        }
+
+        .resultat span {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: block;
+            margin-bottom: 5px;
+            color: #b2bec3;
+        }
+
+        #total { 
+            font-size: 36px; 
+            color: var(--primary-color); 
+            display: block; 
+            font-weight: bold;
+        }
+
+        #phrase {
+            margin-top: 15px;
+            margin-bottom: 0;
+            font-size: 16px;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        .info-methode {
+            margin-top: 15px;
+            font-size: 11px;
+            color: #95a5a6;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 10px;
+        }
     </style>
 </head>
 <body>
 
 <div class="box">
-    <h1>Stop au Gâchis (ODD 12)</h1>
-    <p>Entrez les pesées du jour en kg :</p>
+    <h1>Stop au Gâchis ! 🌍</h1>
+    <p class="description">Projet ODD 12 : Consommation et production responsables.<br>Entrez les pesées de la cantine aujourd'hui :</p>
 
     <div class="ligne">
-        <label>🥗 Déchets alimentaires (plats)</label>
-        <input type="number" id="cat1" placeholder="0" oninput="calculer()">
+        <label for="cat1">🥗 Déchets alimentaires (plats)</label>
+        <input type="number" id="cat1" min="0" step="0.1" placeholder="0" oninput="calculer()">
     </div>
 
     <div class="ligne">
-        <label>🥖 Pain</label>
-        <input type="number" id="cat2" placeholder="0" oninput="calculer()">
+        <label for="cat2">🥖 Pain gaspillé</label>
+        <input type="number" id="cat2" min="0" step="0.1" placeholder="0" oninput="calculer()">
     </div>
 
     <div class="ligne">
-        <label>🧻 Serviettes papier</label>
-        <input type="number" id="cat3" placeholder="0" oninput="calculer()">
+        <label for="cat3">🧻 Serviettes en papier</label>
+        <input type="number" id="cat3" min="0" step="0.1" placeholder="0" oninput="calculer()">
     </div>
 
     <div class="ligne">
-        <label>🍎 Fruits entamés</label>
-        <input type="number" id="cat4" placeholder="0" oninput="calculer()">
+        <label for="cat4">🍎 Fruits entamés / non touchés</label>
+        <input type="number" id="cat4" min="0" step="0.1" placeholder="0" oninput="calculer()">
     </div>
 
     <div class="resultat">
-        <span>Total gaspillé aujourd'hui :</span>
-        <strong id="total">0 kg</strong>
-        <p id="phrase"></p>
+        <span>Bilan de la journée</span>
+        <strong id="total">0.00 kg</strong>
+        <p id="phrase">En attente des données...</p>
+        <div class="info-methode">Base de calcul : 1 repas complet ≈ 500g de nourriture.</div>
     </div>
 </div>
 
 <script>
     function calculer() {
-        // On récupère les 4 valeurs
-        let v1 = parseFloat(document.getElementById('cat1').value) || 0;
-        let v2 = parseFloat(document.getElementById('cat2').value) || 0;
-        let v3 = parseFloat(document.getElementById('cat3').value) || 0;
-        let v4 = parseFloat(document.getElementById('cat4').value) || 0;
+        // Récupération des valeurs avec sécurité (si vide ou négatif)
+        let v1 = Math.max(0, parseFloat(document.getElementById('cat1').value) || 0);
+        let v2 = Math.max(0, parseFloat(document.getElementById('cat2').value) || 0);
+        let v3 = Math.max(0, parseFloat(document.getElementById('cat3').value) || 0);
+        let v4 = Math.max(0, parseFloat(document.getElementById('cat4').value) || 0);
 
-        // On fait l'addition
+        // Calcul du total global
         let somme = v1 + v2 + v3 + v4;
 
-        // On affiche le résultat
+        // Mise à jour de l'affichage du poids
         document.getElementById('total').innerText = somme.toFixed(2) + " kg";
 
-        // Petite phrase d'impact (un repas = 0.5kg)
+        // Calcul de l'équivalence en repas (0.5 kg par repas)
         let repas = Math.round(somme / 0.5);
-        if(somme > 0) {
-            document.getElementById('phrase').innerText = "Cela représente " + repas + " repas jetés.";
+        
+        let phraseResultat = "";
+        
+        if (somme > 0) {
+            phraseResultat = "Cela représente l'équivalent de <strong>" + repas + " repas</strong> jetés à la poubelle.";
+            
+            // Un petit message d'encouragement/sensibilisation si le score est très bas ou haut
+            if (somme > 20) {
+                phraseResultat += "<br>⚠️ C'est beaucoup ! Il faut agir.";
+            } else {
+                phraseResultat += "<br>🌱 Continuez vos efforts pour atteindre le zéro gâchis !";
+            }
         } else {
-            document.getElementById('phrase').innerText = "";
+            phraseResultat = "Bravo ! Aucun gaspillage enregistré pour le moment. 🎉";
         }
+
+        document.getElementById('phrase').innerHTML = phraseResultat;
     }
+    
+    // Initialisation au chargement de la page
+    calculer();
 </script>
 
 </body>

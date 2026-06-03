@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calculateur ODD 12 - Collège</title>
+    <!-- Chargement de la bibliothèque pour le graphique -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
@@ -37,27 +38,31 @@
             margin: 5px 0 0 0;
         }
 
-        /* Conteneur principal en 2 colonnes comme sur l'image */
+        /* CONTENEUR EN 2 COLONNES STRICTES (CÔTE À CÔTE) */
         .main-container {
             display: flex;
+            flex-direction: row; /* Force l'alignement horizontal */
             gap: 25px;
             max-width: 1100px;
             width: 100%;
             justify-content: center;
+            align-items: flex-start;
         }
 
         /* Colonne de gauche (Formulaire + Total) */
         .colonne-gauche {
             flex: 1;
+            min-width: 320px;
             max-width: 450px;
             display: flex;
             flex-direction: column;
             gap: 15px;
         }
 
-        /* Colonne de droite (Graphique) */
+        /* Colonne de droite (Graphique sur le côté) */
         .colonne-droite {
             flex: 1.2;
+            min-width: 350px;
             max-width: 550px;
             background: white;
             border-radius: 20px;
@@ -160,19 +165,7 @@
         .graph-wrapper {
             position: relative;
             width: 100%;
-            height: 300px;
-        }
-
-        /* Version Mobile (Empilé) */
-        @media (max-width: 800px) {
-            .main-container {
-                flex-direction: column;
-                align-items: center;
-            }
-            .colonne-gauche, .colonne-droite {
-                max-width: 100%;
-                width: 100%;
-            }
+            height: 320px;
         }
     </style>
 </head>
@@ -185,6 +178,7 @@
 
     <div class="main-container">
         
+        <!-- COLONNE GAUCHE : SAISIE -->
         <div class="colonne-gauche">
             
             <div class="carte-saisie">
@@ -227,6 +221,7 @@
 
         </div>
 
+        <!-- COLONNE DROITE : GRAPHIQUE TOUJOURS SUR LE CÔTÉ -->
         <div class="colonne-droite">
             <div class="titre-graphe" id="titreGraphe">RÉPARTITION DU GASPILLAGE (en %)</div>
             <div class="graph-wrapper">
@@ -237,7 +232,7 @@
     </div>
 
 <script>
-    // Configuration initiale du graphique en Donut (Camembert évidé)
+    // Configuration initiale du graphique en Donut
     let ctx = document.getElementById('graphDonut').getContext('2d');
     let graphDonut = new Chart(ctx, {
         type: 'doughnut', 
@@ -257,13 +252,13 @@
                 legend: {
                     position: 'bottom',
                     labels: {
-                        boxWidth: 15,
+                        boxWidth: 12,
                         padding: 15,
-                        font: { size: 13, weight: 'bold' }
+                        font: { size: 12, weight: 'bold' }
                     }
                 }
             },
-            cutout: '65%' // Crée l'effet de cercle vide au milieu
+            cutout: '65%'
         }
     });
 

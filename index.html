@@ -38,10 +38,10 @@
             margin: 5px 0 0 0;
         }
 
-        /* CONTENEUR EN 2 COLONNES STRICTES (CÔTE À CÔTE) */
+        /* Conteneur en 2 colonnes côte à côte */
         .main-container {
             display: flex;
-            flex-direction: row; /* Force l'alignement horizontal */
+            flex-direction: row;
             gap: 25px;
             max-width: 1100px;
             width: 100%;
@@ -59,7 +59,7 @@
             gap: 15px;
         }
 
-        /* Colonne de droite (Graphique sur le côté) */
+        /* Colonne de droite (Graphique) */
         .colonne-droite {
             flex: 1.2;
             min-width: 350px;
@@ -149,8 +149,25 @@
         .zone-bilan .phrase-impact {
             font-size: 15px;
             color: #333;
-            margin: 0;
+            margin: 0 0 15px 0;
             font-weight: 600;
+        }
+
+        /* Bouton pour réinitialiser les données */
+        .btn-reset {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-reset:hover {
+            background-color: #c0392b;
         }
 
         /* Titre du Graphique */
@@ -217,11 +234,12 @@
                 <span>Total gaspillé aujourd'hui</span>
                 <strong class="grand-total" id="total">0.0 kg</strong>
                 <p class="phrase-impact" id="phrase">En attente de saisie...</p>
+                <button class="btn-reset" onclick="reinitialiser()">🔄 Remettre à zéro</button>
             </div>
 
         </div>
 
-        <!-- COLONNE DROITE : GRAPHIQUE TOUJOURS SUR LE CÔTÉ -->
+        <!-- COLONNE DROITE : GRAPHIQUE -->
         <div class="colonne-droite">
             <div class="titre-graphe" id="titreGraphe">RÉPARTITION DU GASPILLAGE (en %)</div>
             <div class="graph-wrapper">
@@ -232,7 +250,7 @@
     </div>
 
 <script>
-    // Configuration initiale du graphique en Donut
+    // Configuration initiale du graphique
     let ctx = document.getElementById('graphDonut').getContext('2d');
     let graphDonut = new Chart(ctx, {
         type: 'doughnut', 
@@ -262,25 +280,39 @@
         }
     });
 
+    // ÉTAPE IMPORTANTE : Charger les données enregistrées au démarrage
+    function chargerDonnees() {
+        if(localStorage.getItem('cat1')) document.getElementById('cat1').value = localStorage.getItem('cat1');
+        if(localStorage.getItem('cat2')) document.getElementById('cat2').value = localStorage.getItem('cat2');
+        if(localStorage.getItem('cat3')) document.getElementById('cat3').value = localStorage.getItem('cat3');
+        if(localStorage.getItem('cat4')) document.getElementById('cat4').value = localStorage.getItem('cat4');
+    }
+
     function calculer() {
         let v1 = Math.max(0, parseFloat(document.getElementById('cat1').value) || 0);
         let v2 = Math.max(0, parseFloat(document.getElementById('cat2').value) || 0);
         let v3 = Math.max(0, parseFloat(document.getElementById('cat3').value) || 0);
         let v4 = Math.max(0, parseFloat(document.getElementById('cat4').value) || 0);
 
+        // Sauvegarde automatique des valeurs saisies dans le navigateur
+        localStorage.setItem('cat1', document.getElementById('cat1').value);
+        localStorage.setItem('cat2', document.getElementById('cat2').value);
+        localStorage.setItem('cat3', document.getElementById('cat3').value);
+        localStorage.setItem('cat4', document.getElementById('cat4').value);
+
         let somme = v1 + v2 + v3 + v4;
 
-        // Met à jour le texte du poids total
+        // Mise à jour de l'affichage textuel du poids
         document.getElementById('total').innerText = somme.toFixed(1) + " kg";
 
-        // Met à jour les données du graphique
+        // Mise à jour du graphique
         graphDonut.data.datasets[0].data = [v1, v2, v3, v4];
         graphDonut.update();
 
-        // Met à jour le titre du graphique avec le total en direct
+        // Mise à jour du titre du graphique
         document.getElementById('titreGraphe').innerText = "RÉPARTITION DU GASPILLAGE (en %) - TOTAL: " + somme.toFixed(1) + " kg";
 
-        // Phrase d'impact
+        // Calcul et affichage de la phrase d'impact
         let repas = Math.round(somme / 0.5);
         if (somme > 0) {
             document.getElementById('phrase').innerHTML = "Cela représente <strong>" + repas + " repas jetés</strong>.";
@@ -289,7 +321,20 @@
         }
     }
 
-    // Lancer au démarrage
+    // Fonction pour tout remettre à zéro proprement (bouton rouge)
+    function reinitialiser() {
+        if(confirm("Voulez-vous vraiment effacer toutes les pesées enregistrées ?")) {
+            localStorage.clear();
+            document.getElementById('cat1').value = '';
+            document.getElementById('cat2').value = '';
+            document.getElementById('cat3').value = '';
+            document.getElementById('cat4').value = '';
+            calculer();
+        }
+    }
+
+    // Lancement automatique au chargement de la page
+    chargerDonnees();
     calculer();
 </script>
 

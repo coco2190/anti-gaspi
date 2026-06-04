@@ -87,6 +87,12 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.04);
         }
 
+        /* Carte spéciale pour la config de l'établissement */
+        .carte-config {
+            border: 2px dashed #d18214;
+            background-color: #fffaf0;
+        }
+
         .icone {
             font-size: 30px;
             width: 50px;
@@ -96,6 +102,7 @@
             justify-content: center;
             border-radius: 12px;
         }
+        .bg-config { background-color: #fdedd8; }
         .bg-cat1 { background-color: #eafaf1; }
         .bg-cat2 { background-color: #fef5e7; }
         .bg-cat3 { background-color: #f2f4f4; }
@@ -144,8 +151,16 @@
             font-size: 32px;
             color: #2c3e50;
             display: block;
-            margin: 5px 0;
+            margin: 5px 0 2px 0;
             font-weight: 800;
+        }
+
+        .zone-bilan .moyenne-eleve {
+            font-size: 18px;
+            color: #e67e22;
+            display: block;
+            margin-bottom: 15px;
+            font-weight: 700;
         }
 
         .zone-bilan .phrase-impact {
@@ -210,6 +225,14 @@
         
         <div class="colonne-gauche">
             
+            <div class="carte-saisie carte-config">
+                <div class="icone bg-config">🏫</div>
+                <div class="champs">
+                    <label for="nbEleves">Nombre d'élèves total</label>
+                    <input type="number" id="nbEleves" min="1" placeholder="Ex: 500" oninput="calculer()">
+                </div>
+            </div>
+            
             <div class="carte-saisie">
                 <div class="icone bg-cat1">🥗</div>
                 <div class="champs">
@@ -243,8 +266,10 @@
             </div>
 
             <div class="zone-bilan">
-                <span>Total gaspillé aujourd'hui</span>
+                <span>Bilan de la journée</span>
                 <strong class="grand-total" id="total">0.0 kg</strong>
+                <span class="moyenne-eleve" id="moyenne">Soit : -- g / élève</span>
+                
                 <p class="phrase-impact" id="phrase">En attente de saisie...</p>
                 <button class="btn-reset" onclick="reinitialiser()">🔄 Remettre à zéro</button>
             </div>
@@ -286,22 +311,16 @@
                         font: { size: 12, weight: 'bold' }
                     }
                 },
-                // MODIFICATION : Calcul et affichage des pourcentages dans les bulles (tooltips)
                 tooltip: {
                     callbacks: {
                         label: function(context) {
                             let valeur = context.raw || 0;
-                            // Récupérer toutes les valeurs du graphique pour calculer le total
                             let tableauData = context.chart.data.datasets[0].data;
                             let total = tableauData.reduce((a, b) => a + b, 0);
-                            
-                            // Calcul du pourcentage
                             let pourcentage = 0;
                             if (total > 0) {
                                 pourcentage = ((valeur / total) * 100).toFixed(1);
                             }
-                            
-                            // Renvoie le texte personnalisé (Ex: "Pain: 2.5 kg (25.0%)")
                             return context.label + ': ' + valeur.toFixed(1) + ' kg (' + pourcentage + '%)';
                         }
                     }
@@ -311,8 +330,9 @@
         }
     });
 
-    // Charger les données enregistrées au démarrage
+    // Charger les données enregistrées au démarrage (avec le nombre d'élèves)
     function chargerDonnees() {
+        if(localStorage.getItem('nbEleves')) document.getElementById('nbEleves').value = localStorage.getItem('nbEleves');
         if(localStorage.getItem('cat1')) document.getElementById('cat1').value = localStorage.getItem('cat1');
         if(localStorage.getItem('cat2')) document.getElementById('cat2').value = localStorage.getItem('cat2');
         if(localStorage.getItem('cat3')) document.getElementById('cat3').value = localStorage.getItem('cat3');
@@ -320,12 +340,14 @@
     }
 
     function calculer() {
+        let nbEleves = parseInt(document.getElementById('nbEleves').value) || 0;
         let v1 = Math.max(0, parseFloat(document.getElementById('cat1').value) || 0);
         let v2 = Math.max(0, parseFloat(document.getElementById('cat2').value) || 0);
         let v3 = Math.max(0, parseFloat(document.getElementById('cat3').value) || 0);
         let v4 = Math.max(0, parseFloat(document.getElementById('cat4').value) || 0);
 
-        // Sauvegarde automatique
+        // Sauvegarde automatique locale (y compris le nombre d'élèves)
+        localStorage.setItem('nbEleves', document.getElementById('nbEleves').value);
         localStorage.setItem('cat1', document.getElementById('cat1').value);
         localStorage.setItem('cat2', document.getElementById('cat2').value);
         localStorage.setItem('cat3', document.getElementById('cat3').value);
@@ -336,17 +358,33 @@
         // Mise à jour de l'affichage du poids total
         document.getElementById('total').innerText = somme.toFixed(1) + " kg";
 
-        // Mise à jour des données brutes du graphique
+        // NOUVEAU : Calcul et affichage de la moyenne par élève en grammes
+        if (nbEleves > 0 && somme > 0) {
+            let moyenneGrammes = (somme * 1000) / nbEleves;
+            document.getElementById('moyenne').innerText = "Soit : " + moyenneGrammes.toFixed(1) + " g / élève";
+        } else if (nbEleves > 0) {
+            document.getElementById('moyenne').innerText = "Soit : 0.0 g / élève";
+        } else {
+            document.getElementById('moyenne').innerText = "Saisir le nombre d'élèves 👆";
+        }
+
+        // Mise à jour du graphique
         graphDonut.data.datasets[0].data = [v1, v2, v3, v4];
         graphDonut.update();
 
         // Mise à jour du titre du graphique
         document.getElementById('titreGraphe').innerText = "RÉPARTITION DU GASPILLAGE - TOTAL: " + somme.toFixed(1) + " kg";
 
-        // Calcul de la phrase d'impact
+        // Calcul de la phrase d'impact pédagogique
         let repas = Math.round(somme / 0.5);
         if (somme > 0) {
-            document.getElementById('phrase').innerHTML = "Cela représente <strong>" + repas + " repas jetés</strong>.";
+            let texteImpact = "Cela représente <strong>" + repas + " repas jetés</strong>.";
+            // Option pédagogique bonus si le nombre d'élèves est connu
+            if(nbEleves > 0 && repas >= nbEleves) {
+                let pourcentEtab = Math.round((repas / nbEleves) * 100);
+                texteImpact += " De quoi nourrir à nouveau <strong>" + pourcentEtab + "%</strong> du collège !";
+            }
+            document.getElementById('phrase').innerHTML = textImpact;
         } else {
             document.getElementById('phrase').innerText = "Aucun gaspillage enregistré ! 🎉";
         }
@@ -356,6 +394,7 @@
     function reinitialiser() {
         if(confirm("Voulez-vous vraiment effacer toutes les pesées enregistrées ?")) {
             localStorage.clear();
+            document.getElementById('nbEleves').value = '';
             document.getElementById('cat1').value = '';
             document.getElementById('cat2').value = '';
             document.getElementById('cat3').value = '';

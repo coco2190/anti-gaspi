@@ -6,88 +6,111 @@
     <title>Calculateur ODD 12 - Collège</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        :root {
+            --primary: #d18214;
+            --primary-light: #fffaf0;
+            --bg-main: #f0f4f8;
+            --text-dark: #2c3e50;
+            --text-light: #7f8c8d;
+            --border-color: #dcdde1;
+            
+            /* Catégories */
+            --cat-plats: #2ecc71;
+            --cat-pain: #f1c40f;
+            --cat-serviettes: #95a5a6;
+            --cat-fruits: #e74c3c;
+        }
+
         body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background-color: #e9eef4;
+            font-family: 'Segoe UI', system-ui, Arial, sans-serif;
+            background-color: var(--bg-main);
             margin: 0;
             padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
+            color: var(--text-dark);
         }
 
         .header-titre {
             text-align: center;
-            margin-bottom: 25px;
+            margin-bottom: 30px;
         }
 
         .header-titre h1 {
-            color: #d18214;
-            font-size: 26px;
+            color: var(--primary);
+            font-size: 28px;
             text-transform: uppercase;
             letter-spacing: 1px;
             margin: 0;
-            font-weight: bold;
+            font-weight: 800;
         }
 
         .header-titre p {
             color: #555;
-            font-size: 15px;
+            font-size: 16px;
             font-weight: 600;
-            margin: 5px 0 0 0;
+            margin: 8px 0 0 0;
         }
 
-        /* Conteneur en 2 colonnes côte à côte */
+        /* Conteneur principal */
         .main-container {
             display: flex;
             flex-direction: row;
-            gap: 25px;
+            gap: 30px;
             max-width: 1200px;
             width: 100%;
             justify-content: center;
             align-items: flex-start;
         }
 
-        /* Colonne de gauche (Formulaire + Total) */
+        /* Colonne Gauche (Formulaire) */
         .colonne-gauche {
             flex: 1;
             min-width: 320px;
             max-width: 450px;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 16px;
             width: 100%;
         }
 
-        /* Colonne de droite (Graphiques et Tableaux) */
+        /* Colonne Droite (Visualisation) */
         .colonne-droite {
             flex: 1.5;
             min-width: 380px;
             background: white;
             border-radius: 20px;
-            padding: 25px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
             display: flex;
             flex-direction: column;
-            gap: 30px;
+            gap: 35px;
             width: 100%;
             box-sizing: border-box;
         }
 
-        /* Style des cartes de saisie */
+        /* Cartes de saisie */
         .carte-saisie {
             background: white;
-            border-radius: 15px;
-            padding: 15px;
+            border-radius: 16px;
+            padding: 16px;
             display: flex;
             align-items: center;
             gap: 15px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            border: 1px solid rgba(0,0,0,0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .carte-saisie:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.06);
         }
 
         .carte-config {
-            border: 2px dashed #d18214;
-            background-color: #fffaf0;
+            border: 2px dashed var(--primary);
+            background-color: var(--primary-light);
         }
 
         .carte-jour {
@@ -96,14 +119,16 @@
         }
 
         .icone {
-            font-size: 30px;
+            font-size: 26px;
             width: 50px;
             height: 50px;
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 12px;
+            flex-shrink: 0;
         }
+        
         .bg-config { background-color: #fdedd8; }
         .bg-jour { background-color: #d6eaf8; }
         .bg-cat1 { background-color: #eafaf1; }
@@ -117,44 +142,54 @@
 
         .champs label {
             display: block;
-            font-size: 14px;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 5px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #4a5568;
+            margin-bottom: 6px;
         }
 
         .champs input, .champs select {
             width: 100%;
-            border: 1px solid #dcdde1;
+            border: 1px solid var(--border-color);
             background-color: #f8f9fa;
-            padding: 8px 12px;
-            border-radius: 8px;
+            padding: 10px 12px;
+            border-radius: 10px;
             font-size: 16px;
             box-sizing: border-box;
             font-weight: bold;
-            color: #2f3640;
+            color: var(--text-dark);
+            transition: border-color 0.2s, background-color 0.2s;
         }
 
-        /* Zone de bilan */
+        .champs input:focus, .champs select:focus {
+            outline: none;
+            border-color: #3498db;
+            background-color: #fff;
+        }
+
+        /* Zone Bilan */
         .zone-bilan {
             background: white;
             border-radius: 20px;
-            padding: 20px;
+            padding: 25px;
             text-align: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.04);
+            border: 1px solid rgba(0,0,0,0.05);
         }
 
         .zone-bilan span {
             font-size: 14px;
-            color: #7f8c8d;
+            color: var(--text-light);
             font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .zone-bilan .grand-total {
-            font-size: 32px;
-            color: #2c3e50;
+            font-size: 36px;
+            color: var(--text-dark);
             display: block;
-            margin: 5px 0 2px 0;
+            margin: 8px 0 4px 0;
             font-weight: 800;
         }
 
@@ -162,38 +197,48 @@
             font-size: 18px;
             color: #e67e22;
             display: block;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             font-weight: 700;
         }
 
         .zone-bilan .phrase-impact {
             font-size: 15px;
             color: #333;
-            margin: 0 0 15px 0;
-            font-weight: 600;
+            margin: 0 0 20px 0;
+            padding: 12px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            line-height: 1.4;
         }
 
         .btn-reset {
-            background-color: #e74c3c;
+            background-color: var(--cat-fruits);
             color: white;
             border: none;
-            padding: 8px 15px;
-            border-radius: 8px;
+            padding: 10px 20px;
+            border-radius: 10px;
             font-size: 13px;
-            font-weight: bold;
+            font-weight: 700;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: background 0.2s, transform 0.1s;
+            width: 100%;
         }
 
         .btn-reset:hover {
             background-color: #c0392b;
+            transform: scale(1.01);
         }
 
+        .btn-reset:active {
+            transform: scale(0.99);
+        }
+
+        /* Graphiques & Tableaux */
         .titre-graphe {
             font-size: 15px;
-            font-weight: bold;
-            color: #2c3e50;
-            margin-bottom: 15px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 20px;
             text-align: center;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -202,33 +247,34 @@
         .graph-wrapper {
             position: relative;
             width: 100%;
-            height: 230px;
+            height: 250px;
         }
 
         .separateur-graphe {
             width: 100%;
             border: 0;
-            border-top: 1px dashed #dcdde1;
-            margin: 0;
+            border-top: 1px dashed var(--border-color);
+            margin: 5px 0;
         }
 
-        /* Style de la table récapitulative Mois/Année */
+        /* Tableau Récapitulatif */
         .recap-container {
             width: 100%;
         }
 
         .table-recap {
             width: 100%;
-            border-collapse: collapse;
+            border-collapse: separate;
+            border-spacing: 0;
             margin-top: 10px;
             background: #f8f9fa;
-            border-radius: 12px;
+            border-radius: 14px;
             overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            border: 1px solid rgba(0,0,0,0.03);
         }
 
         .table-recap th, .table-recap td {
-            padding: 12px 15px;
+            padding: 14px 16px;
             text-align: center;
             font-size: 14px;
         }
@@ -239,28 +285,30 @@
             font-weight: 600;
             text-transform: uppercase;
             font-size: 12px;
+            letter-spacing: 0.5px;
         }
 
-        .table-recap tr:not(:last-child) {
+        .table-recap tr:not(:last-child) td {
             border-bottom: 1px solid #e2e8f0;
         }
 
         .table-recap td strong {
-            color: #2c3e50;
-            font-size: 15px;
+            color: var(--text-dark);
+            font-size: 14px;
         }
 
         .badge-repas {
             background-color: #fde8e8;
-            color: #e74c3c;
-            padding: 6px 10px;
-            border-radius: 6px;
-            font-weight: bold;
+            color: var(--cat-fruits);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 700;
             font-size: 13px;
             display: inline-block;
         }
 
-        @media (max-width: 850px) {
+        /* Responsive */
+        @media (max-width: 900px) {
             .main-container {
                 flex-direction: column;
                 align-items: center;
@@ -392,9 +440,9 @@
                         </tr>
                         <tr>
                             <td><strong>Sur l'Année</strong> (36 sem.)</td>
-                            <td id="tdAnneeKg" style="color: #c0392b; font-weight: bold;">0.0 kg</td>
+                            <td id="tdAnneeKg" style="color: var(--cat-fruits); font-weight: bold;">0.0 kg</td>
                             <td id="tdAnneeMoy">--</td>
-                            <td><span class="badge-repas" id="tdAnneeRepas" style="background-color: #c0392b; color: white;">0</span></td>
+                            <td><span class="badge-repas" id="tdAnneeRepas" style="background-color: var(--cat-fruits); color: white;">0</span></td>
                         </tr>
                     </tbody>
                 </table>
@@ -405,7 +453,15 @@
     </div>
 
 <script>
-    const couleursCategories = ['#4caf50', '#ffb13b', '#b2bec3', '#e74c3c'];
+    // Récupération des couleurs CSS de manière dynamique
+    const style = getComputedStyle(document.documentElement);
+    const couleursCategories = [
+        style.getPropertyValue('--cat-plats').trim(),
+        style.getPropertyValue('--cat-pain').trim(),
+        style.getPropertyValue('--cat-serviettes').trim(),
+        style.getPropertyValue('--cat-fruits').trim()
+    ];
+    
     const labelsCategories = ['Déchets alimentaires', 'Pain', 'Serviettes papier', 'Fruits entamés'];
     const joursSemaine = ['Lundi', 'Mardi', 'Jeudi', 'Vendredi'];
 
@@ -426,19 +482,19 @@
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: { position: 'bottom', labels: { boxWidth: 12, padding: 5, font: { size: 11, weight: 'bold' } } },
+                legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15, font: { size: 12, weight: '600' } } },
                 tooltip: {
                     callbacks: {
                         label: function(context) {
                             let valeur = context.raw || 0;
                             let total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
                             let pct = total > 0 ? ((valeur / total) * 100).toFixed(1) : 0;
-                            return context.label + ': ' + valeur.toFixed(1) + ' kg (' + pct + '%)';
+                            return ' ' + context.label + ': ' + valeur.toFixed(1) + ' kg (' + pct + '%)';
                         }
                     }
                 }
             },
-            cutout: '55%'
+            cutout: '65%'
         }
     });
 
@@ -449,18 +505,18 @@
         data: {
             labels: joursSemaine,
             datasets: [
-                { label: 'Déchets alimentaires', data: [0,0,0,0], backgroundColor: couleursCategories[0] },
-                { label: 'Pain', data: [0,0,0,0], backgroundColor: couleursCategories[1] },
-                { label: 'Serviettes papier', data: [0,0,0,0], backgroundColor: couleursCategories[2] },
-                { label: 'Fruits entamés', data: [0,0,0,0], backgroundColor: couleursCategories[3] }
+                { label: 'Déchets alimentaires', data: [0,0,0,0], backgroundColor: couleursCategories[0], borderRadius: 4 },
+                { label: 'Pain', data: [0,0,0,0], backgroundColor: couleursCategories[1], borderRadius: 4 },
+                { label: 'Serviettes papier', data: [0,0,0,0], backgroundColor: couleursCategories[2], borderRadius: 4 },
+                { label: 'Fruits entamés', data: [0,0,0,0], backgroundColor: couleursCategories[3], borderRadius: 4 }
             ]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             scales: {
-                x: { stacked: true },
-                y: { stacked: true, title: { display: true, text: 'kg' } }
+                x: { stacked: true, grid: { display: false } },
+                y: { stacked: true, title: { display: true, text: 'kg', font: { weight: 'bold' } } }
             },
             plugins: {
                 legend: { display: false },
@@ -479,17 +535,13 @@
         }
     });
 
-    function chargerJour() {
+    function changerJour() {
         let jour = document.getElementById('jourSemaine').value;
         document.getElementById('cat1').value = localStorage.getItem(jour + '_cat1') || '';
         document.getElementById('cat2').value = localStorage.getItem(jour + '_cat2') || '';
         document.getElementById('cat3').value = localStorage.getItem(jour + '_cat3') || '';
         document.getElementById('cat4').value = localStorage.getItem(jour + '_cat4') || '';
         document.getElementById('titreBilanJour').innerText = "Bilan du " + jour;
-    }
-
-    function changerJour() {
-        chargerJour();
         calculer(false);
     }
 
@@ -547,7 +599,7 @@
         let sommeMoisKg = sommeSemaineKg * 4;
         let sommeAnneeKg = sommeSemaineKg * 36; 
 
-        // Remplissage du tableau HTML (CORRIGÉ)
+        // Remplissage du tableau
         document.getElementById('tdSemaineKg').innerText = sommeSemaineKg.toFixed(1) + " kg";
         document.getElementById('tdMoisKg').innerText = sommeMoisKg.toFixed(1) + " kg";
         document.getElementById('tdAnneeKg').innerText = sommeAnneeKg.toFixed(1) + " kg";
@@ -557,11 +609,8 @@
         document.getElementById('tdAnneeRepas').innerText = Math.round(sommeAnneeKg / 0.5);
 
         if (nbEleves > 0) {
-            // Moyenne par élève sur la semaine (en grammes)
             document.getElementById('tdSemaineMoy').innerText = ((sommeSemaineKg * 1000) / nbEleves).toFixed(0) + " g / él";
-            // Moyenne par élève sur le mois (en kilogrammes pour rester lisible)
             document.getElementById('tdMoisMoy').innerText = (sommeMoisKg / nbEleves).toFixed(2) + " kg / él";
-            // Moyenne par élève sur l'année (en kilogrammes)
             document.getElementById('tdAnneeMoy').innerText = (sommeAnneeKg / nbEleves).toFixed(1) + " kg / él";
         } else {
             document.getElementById('tdSemaineMoy').innerText = "--";
@@ -584,12 +633,11 @@
     }
 
     function reinitialiser() {
-        if(confirm("Voulez-vous effacer TOUTES les données ?")) {
+        if(confirm("Voulez-vous effacer TOUTES les données de la semaine ?")) {
             localStorage.clear();
             document.getElementById('nbEleves').value = '';
             document.getElementById('jourSemaine').value = 'Lundi';
-            chargerJour();
-            calculer();
+            changerJour();
         }
     }
 
@@ -597,8 +645,8 @@
     if(localStorage.getItem('nbEleves')) {
         document.getElementById('nbEleves').value = localStorage.getItem('nbEleves');
     }
-    chargerJour();
-    calculer(false);
+    // Appel direct pour charger le jour initial sans double calcul
+    changerJour();
 </script>
 
 </body>

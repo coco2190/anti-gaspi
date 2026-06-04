@@ -212,7 +212,7 @@
             margin: 0;
         }
 
-        /* NOUVEAU : Styles pour la table récapitulative Mois/Année */
+        /* Style de la table récapitulative Mois/Année */
         .recap-container {
             width: 100%;
         }
@@ -224,6 +224,7 @@
             background: #f8f9fa;
             border-radius: 12px;
             overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
         }
 
         .table-recap th, .table-recap td {
@@ -246,16 +247,17 @@
 
         .table-recap td strong {
             color: #2c3e50;
-            font-size: 16px;
+            font-size: 15px;
         }
 
         .badge-repas {
             background-color: #fde8e8;
             color: #e74c3c;
-            padding: 4px 8px;
+            padding: 6px 10px;
             border-radius: 6px;
             font-weight: bold;
             font-size: 13px;
+            display: inline-block;
         }
 
         @media (max-width: 850px) {
@@ -509,7 +511,7 @@
             localStorage.setItem(jourActuel + '_cat4', document.getElementById('cat4').value);
         }
 
-        // 1. Total du jour sélectionné
+        // Total du jour
         let sommeJourKg = v1 + v2 + v3 + v4;
         document.getElementById('total').innerText = sommeJourKg.toFixed(1) + " kg";
         document.getElementById('titreGraphe').innerText = "1. Répartition (" + jourActuel + ") - TOTAL: " + sommeJourKg.toFixed(1) + " kg";
@@ -524,9 +526,8 @@
             document.getElementById('moyenne').innerText = nbEleves > 0 ? "Soit : 0.0 g / élève" : "Saisir l'effectif 🏫";
         }
 
-        // 2. Parcourir la semaine pour mettre à jour le graphique en barre ET calculer le total semaine
+        // Calculs semaine
         let sommeSemaineKg = 0;
-
         joursSemaine.forEach((j, index) => {
             let j1 = parseFloat(localStorage.getItem(j + '_cat1')) || 0;
             let j2 = parseFloat(localStorage.getItem(j + '_cat2')) || 0;
@@ -542,11 +543,11 @@
         });
         graphSemaineBar.update();
 
-        // 3. NOUVEAU : Calculs et extrapolations statistiques (Mois et Année)
+        // Extrapolations Mois et Année
         let sommeMoisKg = sommeSemaineKg * 4;
-        let sommeAnneeKg = sommeSemaineKg * 36; // Base de 36 semaines scolaires par an
+        let sommeAnneeKg = sommeSemaineKg * 36; 
 
-        // Infiltration des données dans le tableau HTML récapitulatif
+        // Remplissage du tableau HTML (CORRIGÉ)
         document.getElementById('tdSemaineKg').innerText = sommeSemaineKg.toFixed(1) + " kg";
         document.getElementById('tdMoisKg').innerText = sommeMoisKg.toFixed(1) + " kg";
         document.getElementById('tdAnneeKg').innerText = sommeAnneeKg.toFixed(1) + " kg";
@@ -556,9 +557,12 @@
         document.getElementById('tdAnneeRepas').innerText = Math.round(sommeAnneeKg / 0.5);
 
         if (nbEleves > 0) {
+            // Moyenne par élève sur la semaine (en grammes)
             document.getElementById('tdSemaineMoy').innerText = ((sommeSemaineKg * 1000) / nbEleves).toFixed(0) + " g / él";
-            document.getElementById('tdMoisMoy').innerText = ((sommeMoisKg * 1000) / nbEleves).toFixed(1) + " kg / él";
-            document.getElementById('tdAnneeMoy').innerText = ((sommeAnneeKg * 1000) / nbEleves).toFixed(1) + " kg / él";
+            // Moyenne par élève sur le mois (en kilogrammes pour rester lisible)
+            document.getElementById('tdMoisMoy').innerText = (sommeMoisKg / nbEleves).toFixed(2) + " kg / él";
+            // Moyenne par élève sur l'année (en kilogrammes)
+            document.getElementById('tdAnneeMoy').innerText = (sommeAnneeKg / nbEleves).toFixed(1) + " kg / él";
         } else {
             document.getElementById('tdSemaineMoy').innerText = "--";
             document.getElementById('tdMoisMoy').innerText = "--";
@@ -580,7 +584,7 @@
     }
 
     function reinitialiser() {
-        if(confirm("Voulez-vous effacer TOUTES les données (tous les jours de la semaine) ?")) {
+        if(confirm("Voulez-vous effacer TOUTES les données ?")) {
             localStorage.clear();
             document.getElementById('nbEleves').value = '';
             document.getElementById('jourSemaine').value = 'Lundi';

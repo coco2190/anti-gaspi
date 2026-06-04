@@ -42,7 +42,7 @@
             display: flex;
             flex-direction: row;
             gap: 25px;
-            max-width: 1100px;
+            max-width: 1200px;
             width: 100%;
             justify-content: center;
             align-items: flex-start;
@@ -61,16 +61,15 @@
 
         /* Colonne de droite (Graphiques) */
         .colonne-droite {
-            flex: 1.2;
-            min-width: 350px;
-            max-width: 550px;
+            flex: 1.5;
+            min-width: 380px;
             background: white;
             border-radius: 20px;
             padding: 25px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
             display: flex;
             flex-direction: column;
-            gap: 35px; /* Espace entre les deux graphiques */
+            gap: 35px;
             width: 100%;
             box-sizing: border-box;
         }
@@ -86,10 +85,14 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.04);
         }
 
-        /* Carte spéciale pour la config de l'établissement */
         .carte-config {
             border: 2px dashed #d18214;
             background-color: #fffaf0;
+        }
+
+        .carte-jour {
+            border: 2px solid #3498db;
+            background-color: #f1f8ff;
         }
 
         .icone {
@@ -102,6 +105,7 @@
             border-radius: 12px;
         }
         .bg-config { background-color: #fdedd8; }
+        .bg-jour { background-color: #d6eaf8; }
         .bg-cat1 { background-color: #eafaf1; }
         .bg-cat2 { background-color: #fef5e7; }
         .bg-cat3 { background-color: #f2f4f4; }
@@ -119,7 +123,7 @@
             margin-bottom: 5px;
         }
 
-        .champs input {
+        .champs input, .champs select {
             width: 100%;
             border: 1px solid #dcdde1;
             background-color: #f8f9fa;
@@ -131,7 +135,7 @@
             color: #2f3640;
         }
 
-        /* Zone de bilan (Bas gauche) */
+        /* Zone de bilan */
         .zone-bilan {
             background: white;
             border-radius: 20px;
@@ -169,7 +173,6 @@
             font-weight: 600;
         }
 
-        /* Bouton pour réinitialiser les données */
         .btn-reset {
             background-color: #e74c3c;
             color: white;
@@ -186,7 +189,6 @@
             background-color: #c0392b;
         }
 
-        /* Titres des Graphiques */
         .titre-graphe {
             font-size: 15px;
             font-weight: bold;
@@ -200,10 +202,9 @@
         .graph-wrapper {
             position: relative;
             width: 100%;
-            height: 260px; /* Légèrement réduit pour faire tenir proprement les deux graphiques */
+            height: 250px;
         }
 
-        /* Séparateur visuel entre les graphiques */
         .separateur-graphe {
             width: 100%;
             border: 0;
@@ -211,8 +212,7 @@
             margin: 0;
         }
 
-        /* Version mobile adaptive */
-        @media (max-width: 800px) {
+        @media (max-width: 850px) {
             .main-container {
                 flex-direction: column;
                 align-items: center;
@@ -239,6 +239,19 @@
                 <div class="champs">
                     <label for="nbEleves">Nombre d'élèves de l'établissement</label>
                     <input type="number" id="nbEleves" min="1" placeholder="Ex: 500" oninput="calculer()">
+                </div>
+            </div>
+
+            <div class="carte-saisie carte-jour">
+                <div class="icone bg-jour">📅</div>
+                <div class="champs">
+                    <label for="jourSemaine">Jour de la pesée</label>
+                    <select id="jourSemaine" onchange="changerJour()">
+                        <option value="Lundi">Lundi</option>
+                        <option value="Mardi">Mardi</option>
+                        <option value="Jeudi">Jeudi</option>
+                        <option value="Vendredi">Vendredi</option>
+                    </select>
                 </div>
             </div>
             
@@ -275,12 +288,12 @@
             </div>
 
             <div class="zone-bilan">
-                <span>Bilan de la journée</span>
+                <span id="titreBilanJour">Bilan du Lundi</span>
                 <strong class="grand-total" id="total">0.0 kg</strong>
                 <span class="moyenne-eleve" id="moyenne">Soit : -- g / élève</span>
                 
                 <p class="phrase-impact" id="phrase">En attente de saisie...</p>
-                <button class="btn-reset" onclick="reinitialiser()">🔄 Remettre à zéro</button>
+                <button class="btn-reset" onclick="reinitialiser()">🔄 Effacer TOUTE la semaine</button>
             </div>
 
         </div>
@@ -288,7 +301,7 @@
         <div class="colonne-droite">
             
             <div>
-                <div class="titre-graphe" id="titreGraphe">1. Répartition globale du gaspillage</div>
+                <div class="titre-graphe" id="titreGraphe">1. Répartition du jour choisi</div>
                 <div class="graph-wrapper">
                     <canvas id="graphDonut"></canvas>
                 </div>
@@ -297,9 +310,9 @@
             <hr class="separateur-graphe">
 
             <div>
-                <div class="titre-graphe" id="titreGrapheMoyenne">2. Part moyenne par élève (en g)</div>
+                <div class="titre-graphe">2. Évolution du gaspillage sur la semaine (en kg)</div>
                 <div class="graph-wrapper">
-                    <canvas id="graphPieMoyenne"></canvas>
+                    <canvas id="graphSemaineBar"></canvas>
                 </div>
             </div>
 
@@ -308,11 +321,11 @@
     </div>
 
 <script>
-    // Couleurs communes pour la cohérence visuelle
     const couleursCategories = ['#4caf50', '#ffb13b', '#b2bec3', '#e74c3c'];
     const labelsCategories = ['Déchets alimentaires', 'Pain', 'Serviettes papier', 'Fruits entamés'];
+    const joursSemaine = ['Lundi', 'Mardi', 'Jeudi', 'Vendredi'];
 
-    // 1. Initialisation du graphique global (Donut)
+    // 1. Initialisation Graphique Donut (Jour sélectionné)
     let ctxDonut = document.getElementById('graphDonut').getContext('2d');
     let graphDonut = new Chart(ctxDonut, {
         type: 'doughnut', 
@@ -321,7 +334,7 @@
             datasets: [{
                 data: [0, 0, 0, 0],
                 backgroundColor: couleursCategories,
-                borderWidth: 3,
+                borderWidth: 2,
                 borderColor: '#ffffff'
             }]
         },
@@ -329,10 +342,7 @@
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: { boxWidth: 12, padding: 10, font: { size: 11, weight: 'bold' } }
-                },
+                legend: { position: 'bottom', labels: { boxWidth: 12, padding: 8, font: { size: 11, weight: 'bold' } } },
                 tooltip: {
                     callbacks: {
                         label: function(context) {
@@ -344,36 +354,40 @@
                     }
                 }
             },
-            cutout: '60%'
+            cutout: '55%'
         }
     });
 
-    // 2. Initialisation du deuxième graphique (Camembert / Pie pour la moyenne par élève)
-    let ctxPie = document.getElementById('graphPieMoyenne').getContext('2d');
-    let graphPieMoyenne = new Chart(ctxPie, {
-        type: 'pie', 
+    // 2. Initialisation Graphique Hebdomadaire (Barres empilées)
+    let ctxBar = document.getElementById('graphSemaineBar').getContext('2d');
+    let graphSemaineBar = new Chart(ctxBar, {
+        type: 'bar',
         data: {
-            labels: labelsCategories,
-            datasets: [{
-                data: [0, 0, 0, 0],
-                backgroundColor: couleursCategories,
-                borderWidth: 3,
-                borderColor: '#ffffff'
-            }]
+            labels: joursSemaine,
+            datasets: [
+                { label: 'Déchets alimentaires', data: [0,0,0,0], backgroundColor: couleursCategories[0] },
+                { label: 'Pain', data: [0,0,0,0], backgroundColor: couleursCategories[1] },
+                { label: 'Serviettes papier', data: [0,0,0,0], backgroundColor: couleursCategories[2] },
+                { label: 'Fruits entamés', data: [0,0,0,0], backgroundColor: couleursCategories[3] }
+            ]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            scales: {
+                x: { stacked: true },
+                y: { stacked: true, title: { display: true, text: 'Kilos (kg)', font: { weight: 'bold' } } }
+            },
             plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: { boxWidth: 12, padding: 10, font: { size: 11, weight: 'bold' } }
-                },
+                legend: { display: false }, // Masqué pour éviter les doublons visuels avec le donut
                 tooltip: {
+                    mode: 'index',
+                    intersect: false,
                     callbacks: {
-                        label: function(context) {
-                            let valeur = context.raw || 0;
-                            return context.label + ': ' + valeur.toFixed(1) + ' g / élève';
+                        footer: function(tooltipItems) {
+                            let total = 0;
+                            tooltipItems.forEach(function(item) { total += item.raw; });
+                            return 'TOTAL JOUR : ' + total.toFixed(1) + ' kg';
                         }
                     }
                 }
@@ -381,89 +395,106 @@
         }
     });
 
-    // Charger les données enregistrées au démarrage
-    function chargerDonnees() {
-        if(localStorage.getItem('nbEleves')) document.getElementById('nbEleves').value = localStorage.getItem('nbEleves');
-        if(localStorage.getItem('cat1')) document.getElementById('cat1').value = localStorage.getItem('cat1');
-        if(localStorage.getItem('cat2')) document.getElementById('cat2').value = localStorage.getItem('cat2');
-        if(localStorage.getItem('cat3')) document.getElementById('cat3').value = localStorage.getItem('cat3');
-        if(localStorage.getItem('cat4')) document.getElementById('cat4').value = localStorage.getItem('cat4');
+    // Charger les données d'un jour spécifique
+    function chargerJour() {
+        let jour = document.getElementById('jourSemaine').value;
+        
+        // Charger ou vider si rien n'existe
+        document.getElementById('cat1').value = localStorage.getItem(jour + '_cat1') || '';
+        document.getElementById('cat2').value = localStorage.getItem(jour + '_cat2') || '';
+        document.getElementById('cat3').value = localStorage.getItem(jour + '_cat3') || '';
+        document.getElementById('cat4').value = localStorage.getItem(jour + '_cat4') || '';
+        
+        document.getElementById('titreBilanJour').innerText = "Bilan du " + jour;
     }
 
-    function calculer() {
+    // Action déclenchée quand on change de jour dans la liste déroulante
+    function changerJour() {
+        chargerJour();
+        calculer(false); // Relancer le calcul global sans écraser les données
+    }
+
+    function calculer(sauvegarder = true) {
         let nbEleves = parseInt(document.getElementById('nbEleves').value) || 0;
+        let jourActuel = document.getElementById('jourSemaine').value;
+
         let v1 = Math.max(0, parseFloat(document.getElementById('cat1').value) || 0);
         let v2 = Math.max(0, parseFloat(document.getElementById('cat2').value) || 0);
         let v3 = Math.max(0, parseFloat(document.getElementById('cat3').value) || 0);
         let v4 = Math.max(0, parseFloat(document.getElementById('cat4').value) || 0);
 
-        // Sauvegarde automatique locale
+        // Sauvegarder la configuration générale
         localStorage.setItem('nbEleves', document.getElementById('nbEleves').value);
-        localStorage.setItem('cat1', document.getElementById('cat1').value);
-        localStorage.setItem('cat2', document.getElementById('cat2').value);
-        localStorage.setItem('cat3', document.getElementById('cat3').value);
-        localStorage.setItem('cat4', document.getElementById('cat4').value);
 
-        let sommeKg = v1 + v2 + v3 + v4;
-
-        // Variables pour les moyennes individuelles en grammes
-        let m1 = 0, m2 = 0, m3 = 0, m4 = 0, moyenneTotaleGrammes = 0;
-
-        if (nbEleves > 0) {
-            m1 = (v1 * 1000) / nbEleves;
-            m2 = (v2 * 1000) / nbEleves;
-            m3 = (v3 * 1000) / nbEleves;
-            m4 = (v4 * 1000) / nbEleves;
-            moyenneTotaleGrammes = (sommeKg * 1000) / nbEleves;
-            
-            document.getElementById('moyenne').innerText = "Soit : " + moyenneTotaleGrammes.toFixed(1) + " g / élève";
-            document.getElementById('titreGrapheMoyenne').innerText = "2. Part moyenne par élève - TOTAL: " + moyenneTotaleGrammes.toFixed(1) + " g";
-        } else {
-            document.getElementById('moyenne').innerText = "Saisir le nombre d'élèves 👆";
-            document.getElementById('titreGrapheMoyenne').innerText = "2. Part moyenne par élève (en g)";
+        // Sauvegarder les inputs pour le jour en cours
+        if(sauvegarder) {
+            localStorage.setItem(jourActuel + '_cat1', document.getElementById('cat1').value);
+            localStorage.setItem(jourActuel + '_cat2', document.getElementById('cat2').value);
+            localStorage.setItem(jourActuel + '_cat3', document.getElementById('cat3').value);
+            localStorage.setItem(jourActuel + '_cat4', document.getElementById('cat4').value);
         }
 
-        // Mise à jour du texte global de pesée
-        document.getElementById('total').innerText = sommeKg.toFixed(1) + " kg";
-        document.getElementById('titreGraphe').innerText = "1. Répartition globale - TOTAL: " + sommeKg.toFixed(1) + " kg";
-
-        // Mettre à jour le 1er graphique (Donut global)
+        // 1. Mettre à jour les données du Donut (Jour en cours)
+        let sommeJourKg = v1 + v2 + v3 + v4;
+        document.getElementById('total').innerText = sommeJourKg.toFixed(1) + " kg";
+        document.getElementById('titreGraphe').innerText = "1. Répartition (" + jourActuel + ") - TOTAL: " + sommeJourKg.toFixed(1) + " kg";
+        
         graphDonut.data.datasets[0].data = [v1, v2, v3, v4];
         graphDonut.update();
 
-        // Mettre à jour le 2ème graphique (Camembert des moyennes par élève)
-        graphPieMoyenne.data.datasets[0].data = [m1, m2, m3, m4];
-        graphPieMoyenne.update();
+        // 2. Mettre à jour l'affichage de la moyenne par élève pour ce jour
+        if (nbEleves > 0 && sommeJourKg > 0) {
+            let moyenneGrammes = (sommeJourKg * 1000) / nbEleves;
+            document.getElementById('moyenne').innerText = "Soit : " + moyenneGrammes.toFixed(1) + " g / élève";
+        } else {
+            document.getElementById('moyenne').innerText = nbEleves > 0 ? "Soit : 0.0 g / élève" : "Saisir l'effectif 🏫";
+        }
 
-        // Calcul de la phrase d'impact
-        let repas = Math.round(sommeKg / 0.5);
-        if (sommeKg > 0) {
-            let texteImpact = "Cela représente <strong>" + repas + " repas jetés</strong>.";
+        // 3. Récupérer les données de TOUTE la semaine pour monter le graphique hebdomadaire
+        joursSemaine.forEach((j, index) => {
+            let j1 = parseFloat(localStorage.getItem(j + '_cat1')) || 0;
+            let j2 = parseFloat(localStorage.getItem(j + '_cat2')) || 0;
+            let j3 = parseFloat(localStorage.getItem(j + '_cat3')) || 0;
+            let j4 = parseFloat(localStorage.getItem(j + '_cat4')) || 0;
+
+            graphSemaineBar.data.datasets[0].data[index] = j1;
+            graphSemaineBar.data.datasets[1].data[index] = j2;
+            graphSemaineBar.data.datasets[2].data[index] = j3;
+            graphSemaineBar.data.datasets[3].data[index] = j4;
+        });
+        graphSemaineBar.update();
+
+        // Phrase d'impact
+        let repas = Math.round(sommeJourKg / 0.5);
+        if (sommeJourKg > 0) {
+            let texteImpact = "Cela représente <strong>" + repas + " repas jetés</strong> ce jour.";
             if(nbEleves > 0 && repas >= nbEleves) {
                 let pourcentEtab = Math.round((repas / nbEleves) * 100);
-                texteImpact += " De quoi nourrir à nouveau <strong>" + pourcentEtab + "%</strong> du collège !";
+                texteImpact += " De quoi nourrir <strong>" + pourcentEtab + "%</strong> du collège !";
             }
             document.getElementById('phrase').innerHTML = texteImpact;
         } else {
-            document.getElementById('phrase').innerText = "Aucun gaspillage enregistré ! 🎉";
+            document.getElementById('phrase').innerText = "Aucun gaspillage enregistré pour ce jour ! 🎉";
         }
     }
 
+    // Réinitialisation complète de la mémoire
     function reinitialiser() {
-        if(confirm("Voulez-vous vraiment effacer toutes les données ?")) {
+        if(confirm("Voulez-vous effacer TOUTES les données saisies pour TOUS les jours de la semaine ?")) {
             localStorage.clear();
             document.getElementById('nbEleves').value = '';
-            document.getElementById('cat1').value = '';
-            document.getElementById('cat2').value = '';
-            document.getElementById('cat3').value = '';
-            document.getElementById('cat4').value = '';
+            document.getElementById('jourSemaine').value = 'Lundi';
+            chargerJour();
             calculer();
         }
     }
 
-    // Démarrage automatique
-    chargerDonnees();
-    calculer();
+    // Démarrage initial de l'application
+    if(localStorage.getItem('nbEleves')) {
+        document.getElementById('nbEleves').value = localStorage.getItem('nbEleves');
+    }
+    chargerJour();
+    calculer(false);
 </script>
 
 </body>
